@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teleprompter Profissa</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#111111">
+    <style>
+        body { margin: 0; background: #111; color: #fff; font-size: 2em; overflow: hidden; display: flex; flex-direction: column; align-items: center; height: 100vh; }
+        #container { position: relative; width: 80%; height: 70%; overflow: hidden; border: 2px solid #fff; margin-top: 20px; transform: scaleX(1); transition: transform 0.5s; }
+        #texto { position: absolute; width: 100%; top: 100%; text-align: center; }
+        #controls { margin-top: 10px; display: flex; gap: 15px; align-items: center; }
+        input[type="range"] { width: 150px; }
+        textarea { width: 80%; height: 100px; margin-top: 10px; }
+        button { padding: 10px 20px; font-size: 1em; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Teleprompter Profissa</h1>
+    <textarea id="inputTexto" placeholder="Cole seu texto aqui..."></textarea>
+    <div id="controls">
+        <button onclick="startScroll()">Começar</button>
+        <button onclick="pauseScroll()">Pausar/Retomar</button>
+        <button onclick="toggleMirror()">Espelhar</button>
+        Velocidade: <input type="range" id="velocidade" min="1" max="10" value="3">
+    </div>
+    <div id="container">
+        <div id="texto"></div>
+    </div>
+
+    <script>
+        let speed = 3;
+        let position = 100;
+        let scrolling;
+        let paused = false;
+
+        function startScroll() {
+            clearInterval(scrolling);
+            const texto = document.getElementById('inputTexto').value;
+            document.getElementById('texto').innerText = texto;
+            position = 100;
+            document.getElementById('texto').style.top = position + '%';
+            paused = false;
+            scrolling = setInterval(scrollText, 30);
+        }
+
+        function scrollText() {
+            if (!paused) {
+                position -= speed * 0.1;
+                document.getElementById('texto').style.top = position + '%';
+                if (position < -100) clearInterval(scrolling);
+            }
+        }
+
+        function pauseScroll() {
+            paused = !paused;
+        }
+
+        function toggleMirror() {
+            const container = document.getElementById('container');
+            container.style.transform = container.style.transform === 'scaleX(1)' ? 'scaleX(-1)' : 'scaleX(1)';
+        }
+
+        document.getElementById('velocidade').addEventListener('input', (e) => speed = e.target.value);
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('service-worker.js').then(() => console.log('Service Worker registrado!')).catch((error) => console.log('Erro no Service Worker:', error));
+        }
+    </script>
+</body>
+</html>
